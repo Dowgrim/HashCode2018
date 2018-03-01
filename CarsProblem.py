@@ -61,18 +61,27 @@ class Car:
     def avalaible(self):
         return self.state == CarState.WAITING_PASSENGER
 
-    def incrementSteps(self):
-        if self.stepsRemaining>0:
+    def incrementSteps(self, cur_step):
+        #print(self.stepsRemaining == 0)
+        #print(self.state)
+        if self.stepsRemaining > 0:
             self.stepsRemaining -= 1
         if self.stepsRemaining == 0 and not self.avalaible():
-            ride = self.rides[len(rides) - 1]
+            ride = self.rides[len(self.rides) - 1]
             if self.state == CarState.TRAVELLING_TO_PASSENGER:
-                self.state = CarState.TRAVELLING#if we can start
-                self.stepsRemaining = ride.getDistance()
-            elif self.state == CarState.TRAVELLING_TO_PASSENGER:
+                if cur_step < ride.earliest:
+                    self.state = CarState.WAITING_TO_START
+                    self.stepsRemaining = cur_step - ride.earliest
+                else:
+                    self.state = CarState.TRAVELLING#if we can start
+                    self.stepsRemaining = ride.getDistance()
+            elif self.state == CarState.TRAVELLING:
                 self.state = CarState.WAITING_PASSENGER
                 self.x = ride.endX
                 self.y = ride.endY
+            elif self.state == CarState.WAITING_TO_START:
+                self.state = CarState.TRAVELLING
+                self.stepsRemaining = ride.getDistance()
 
     def doRide(self, ride):
         self.rides.append(ride)
@@ -102,11 +111,13 @@ while current_step < steps:
     if len(rides) == 0:
         break
     for car in cars:
-        rideList = car.computeList(rides, current_step, bonus_value)
-        if len(rideList) > 0:
-            curRide = rideList[0][1]
-            rides.remove(rideList[0][1])
-            car.doRide(curRide)
+        car.incrementSteps(current_step)
+        if car.avalaible():
+            rideList = car.computeList(rides, current_step, bonus_value)
+            if len(rideList) > 0:
+                curRide = rideList[0][1]
+                rides.remove(rideList[0][1])
+                car.doRide(curRide)
     current_step += 1
 
 for car in cars:
