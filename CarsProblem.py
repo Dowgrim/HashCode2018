@@ -1,5 +1,22 @@
 import math
 from enum import Enum
+class Simulation:
+    def __init__(self, rows, columns, car_number, ride_number, bonus_value, steps):
+        self.rows = rows
+        self.columns = columns
+        self.car_number = car_number
+        self.ride_number = ride_number
+        self.bonus_value = bonus_value
+        self.steps = steps
+        self.rides = []
+        self.cars = []
+
+    def run(self):
+        print("yolo")
+            
+            
+
+
 
 def distance(startX, startY, endX,endY):
     return math.fabs(startX-endX)+math.fabs(startY-endY)
@@ -43,6 +60,9 @@ class Car:
         self.stepsRemaining = 0
         self.active = True
 
+
+    def isAvailable(self, actualRound):
+        return actualRound > self.roundAvailable
 
     def print(self):
         print(len(self.rides), end=' ')
@@ -93,6 +113,7 @@ class Car:
             self.state = CarState.TRAVELLING_TO_PASSENGER
 
 rides = []
+cars = []
 with open('b_should_be_easy.in') as file:
     rows, columns, car_number, ride_number, bonus_value, steps = [int(i) for i in file.readline().split(' ')]
     number = 0
@@ -100,7 +121,6 @@ with open('b_should_be_easy.in') as file:
         startX, startY, endX, endY, earliest, latest = [int(i) for i in line.split(' ')]
         rides.append(RideRequest(startX, startY, endX, endY,earliest,latest, number) )
         number += 1
-    cars = []
     number = 1
     for i in range(car_number):
         cars.append(Car(number))
